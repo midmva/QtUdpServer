@@ -5,6 +5,7 @@
 
 #include "chart.h"
 #include "chartview.h"
+#include "controlchannel.h"
 #include <QtWidgets/QApplication>
 #include <QtWidgets/QMainWindow>
 
@@ -12,6 +13,7 @@
 #include <QtCharts/QValueAxis>
 #include <QTimer>
 #include <QTime>
+#include <QSettings>
 
 QT_CHARTS_USE_NAMESPACE
 
@@ -41,11 +43,15 @@ private:
     ChartView *chartView;
     qreal maxY;
     qreal minY;
+    QSettings *settings;
 
 private slots:
     void timeOut();
     void startShow();
     void stopShow();
+    void changeChannelSettings(const QString object_name, const ChannelSettings settings);
+    void setSettings();
+    void getSettings(QList<ChannelSettings> &list);
 
 signals:
     void start();

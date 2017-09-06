@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>595</width>
-    <height>300</height>
+    <height>613</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -19,7 +19,7 @@
      <x>90</x>
      <y>30</y>
      <width>425</width>
-     <height>191</height>
+     <height>431</height>
     </rect>
    </property>
    <layout class="QVBoxLayout" name="verticalLayout">
@@ -120,19 +120,6 @@
        <string>Timeout: ms</string>
       </property>
      </widget>
-    </item>
-    <item>
-     <spacer name="verticalSpacer">
-      <property name="orientation">
-       <enum>Qt::Vertical</enum>
-      </property>
-      <property name="sizeHint" stdset="0">
-       <size>
-        <width>20</width>
-        <height>40</height>
-       </size>
-      </property>
-     </spacer>
     </item>
    </layout>
   </widget>

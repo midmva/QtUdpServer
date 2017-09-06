@@ -5,14 +5,24 @@
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow),
-    maxY(0),minY(0)
+    maxY(0),minY(0),settings(new QSettings("Period","QtChartDemo",this))
 {
     ui->setupUi(this);
-    for (int i = 0; i<8;i++){
-        series[i] = new QLineSeries();
-        list_point[i] = new QList<QPointF>();
-    }
 
+
+    QList<ChannelSettings> list;
+    getSettings(list);
+    QPen pen;
+    pen.setWidth(2);
+
+    for (int i = 0; i<8;i++){
+        list_point[i] = new QList<QPointF>();
+        series[i] = new QLineSeries();
+        series[i]->setObjectName(list.at(i).name);
+        pen.setColor(QColor(list.at(i).color));
+        series[i]->setPen(pen);
+        series[i]->setVisible(list.at(i).enable);
+    }
 
     timer = new QTimer(this);
     connect(timer,&QTimer::timeout,this,&MainWindow::timeOut);
@@ -74,20 +84,12 @@ MainWindow::MainWindow(QWidget *parent) :
     chartView = new ChartView(chart);
     chartView->setRenderHint(QPainter::Antialiasing);
 
-    QPen pen(Qt::green);
-    pen.setWidth(2);
-    series[0]->setPen(pen);
-    pen.setColor(Qt::red);
-    series[1]->setPen(pen);
-    pen.setColor(Qt::blue);
-    series[2]->setPen(pen);
-    pen.setColor(Qt::cyan);
-    series[3]->setPen(pen);
+
 
     pen.setColor(Qt::black);
     chart->setBackgroundPen(pen);
 
-    ControlPanel *control = new ControlPanel(this);
+    ControlPanel *control = new ControlPanel(this,&list);
 
     ui->centralWidget->setLayout(ui->horizontalLayout);
     ui->horizontalLayout->addWidget(control);
@@ -96,12 +98,14 @@ MainWindow::MainWindow(QWidget *parent) :
     QObject::connect(control,&ControlPanel::start,this,&MainWindow::startShow);
     QObject::connect(control,&ControlPanel::stop,this,&MainWindow::stopShow);
     QObject::connect(control,&ControlPanel::changeSpeed,this,&MainWindow::changeSpeed);
+    QObject::connect(control,&ControlPanel::changeSettings,this,&MainWindow::changeChannelSettings);
 
     //setCentralWidget(chartView);
 }
 
 MainWindow::~MainWindow()
 {
+    setSettings();
     delete ui;
 }
 
@@ -203,4 +207,59 @@ void MainWindow::stopShow()
     chartView->chart()->axisY()->setMax(maxY);
     chartView->chart()->axisY()->setMin(minY);
 
+}
+
+void MainWindow::changeChannelSettings(const QString object_name, const ChannelSettings settings)
+{
+    for (int i = 0; i<8; i++){
+        if (series[i]->objectName() == object_name){
+            series[i]->setColor(QColor(settings.color));
+            series[i]->setVisible(settings.enable);
+            break;
+        }
+    }
+}
+
+void MainWindow::setSettings()
+{
+    settings->beginGroup("application");
+        settings->setValue("x",geometry().x());
+        settings->setValue("y",geometry().y());
+        settings->setValue("width",geometry().width());
+        settings->setValue("height",geometry().height());
+    settings->endGroup();
+    settings->beginGroup("channels");
+    ControlPanel *panel = findChild<ControlPanel*>();
+    QList<ControlChannel*> list = panel->findChildren<ControlChannel*>();
+    for (int i = 0; i<list.count();i++){
+        ChannelSettings s = list.at(i)->getSettings();
+        settings->beginGroup(QString("channel %1").arg(i));
+            settings->setValue("enable",s.enable);
+            settings->setValue("color",s.color);
+            settings->setValue("name",s.name);
+        settings->endGroup();
+    }
+    settings->endGroup();
+}
+
+void MainWindow::getSettings(QList<ChannelSettings> &list)
+{
+    settings->beginGroup("application");
+        int x = settings->value("x",100).toInt();
+        int y = settings->value("y",100).toInt();
+        int width = settings->value("width",200).toInt();
+        int heigth = settings->value("height",100).toInt();
+    settings->endGroup();
+    setGeometry(x,y,width,heigth);
+    settings->beginGroup("channels");
+    for (int i = 0; i<8; i++){
+        ChannelSettings s;
+        settings->beginGroup(QString("channel %1").arg(i));
+        s.enable = settings->value("enable",true).toBool();
+        s.color = settings->value("color","#000000").toString();
+        s.name = settings->value("name",QString("channel %1").arg(i)).toString();
+        settings->endGroup();
+        list.append(s);
+    }
+    settings->endGroup();
 }

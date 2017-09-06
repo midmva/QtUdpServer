@@ -29,15 +29,21 @@ SOURCES += \
     chart.cpp \
     chartview.cpp \
     controlpanel.cpp \
-    threadcalculate.cpp
+    threadcalculate.cpp \
+    controlchannel.cpp
 
 HEADERS += \
         mainwindow.h \
     chart.h \
     chartview.h \
     controlpanel.h \
-    threadcalculate.h
+    threadcalculate.h \
+    controlchannel.h
 
 FORMS += \
         mainwindow.ui \
-    controlpanel.ui
+    controlpanel.ui \
+    controlchannel.ui
+
+RESOURCES += \
+    res.qrc

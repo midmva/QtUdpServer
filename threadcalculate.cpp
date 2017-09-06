@@ -44,10 +44,14 @@ void ThreadCalculate::timeOut()
     static int i = 0;
     //for (int j = 0; j<3; j++)
     QList<qreal> list_data;
-    list_data.append((qreal)qSin(M_PI / 50 * (i)) * 100);
-    list_data.append((qreal)qCos(M_PI / 50 * (i++)) * 100);
-    list_data.append((qreal)qCos(M_PI / 50 * (i++)+M_PI/4) * 100);
-    list_data.append((qreal)qCos(M_PI / 50 * (i++)+3*M_PI/4) * 100);
+    list_data.append((qreal)qCos(M_PI / 50 * (i)) * 100);
+    list_data.append((qreal)qCos(M_PI / 50 * (i)+M_PI/8) * 100);
+    list_data.append((qreal)qCos(M_PI / 50 * (i)+M_PI/4) * 100);
+    list_data.append((qreal)qCos(M_PI / 50 * (i)+3*M_PI/8) * 100);
+    list_data.append((qreal)qCos(M_PI / 50 * (i)+M_PI/2) * 100);
+    list_data.append((qreal)qCos(M_PI / 50 * (i)+5*M_PI/8) * 100);
+    list_data.append((qreal)qCos(M_PI / 50 * (i)+3*M_PI/4) * 100);
+    list_data.append((qreal)qCos(M_PI / 50 * (i++)+7*M_PI/8) * 100);
     emit addData(time->elapsed()*0.001,list_data);
 //        emit addPoint(QPointF((qreal)time->elapsed()/1000,(qreal)qSin(M_PI / 50 * (++i)) * 100));
 }
