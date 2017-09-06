@@ -1,0 +1,2 @@
+# QtChartDemo
+sample of QtChart
