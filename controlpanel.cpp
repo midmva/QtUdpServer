@@ -7,6 +7,7 @@ ControlPanel::ControlPanel(QWidget *parent) :
     ui(new Ui::ControlPanel)
 
 {
+    //TODO color settings
     ui->setupUi(this);
     setFixedWidth(200);
     setLayout(ui->verticalLayout);
