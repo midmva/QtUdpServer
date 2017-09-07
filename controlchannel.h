@@ -6,11 +6,11 @@
 namespace Ui {
 class ControlChannel;
 }
-struct ChannelSettings{
+typedef struct {
     bool enable;
     QString color;
     QString name;
-};
+}ChannelSettings;
 
 class ControlChannel : public QWidget
 {
@@ -34,7 +34,7 @@ private:
     ChannelSettings settings;
 
 signals:
-    void changeChannelSettings(const QString object_name, const ChannelSettings settings);
+    void signalChangeChannelSettings(const QString object_name, const ChannelSettings settings);
 
 };
 

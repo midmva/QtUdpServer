@@ -19,9 +19,9 @@ public:
     ~ThreadCalculate();
 
 public slots:
-    void startTimer();
-    void stopTimer();
-    void changeSpeed(int speed);
+    void slotStartTimer();
+    void slotStopTimer();
+    void slotChangeSpeed(int speed);
 
 private:
     QTimer *timer;
@@ -30,12 +30,12 @@ private:
     QList<QPointF> *list;
 
 private slots:
-    void timeOut();
+    void slotTimeOut();
 
 signals:
-    void addPoint(const QPointF point);
-    void addData(const qreal time, const QList<qreal> list_data);
-    void addList(const QList<QPointF> l);
+    void signalAddPoint(const QPointF point);
+    void signalAddData(const qreal time, const QList<qreal> list_data);
+    void signalAddList(const QList<QPointF> l);
 
 
 };

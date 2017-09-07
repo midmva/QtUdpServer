@@ -6,6 +6,7 @@
 #include "chart.h"
 #include "chartview.h"
 #include "controlchannel.h"
+#include "threadreceiver.h"
 #include <QtWidgets/QApplication>
 #include <QtWidgets/QMainWindow>
 
@@ -30,11 +31,13 @@ public:
     ~MainWindow();
 
 public slots:
-    void addPoint(const QPointF point);
-    void addList(const QList<QPointF> l);
-    void addData(const qreal time, const QList<qreal> list_data);
+    void slotAddPoint(const QPointF point);
+    void slotAddList(const QList<QPointF> l);
+    void slotAddData(const qreal time, const QList<qreal> list_data);
+    void slotReceiveUdpPacket(const Packet &packet);
 
 private:
+    qreal time_screen;
     QTimer *timer;
     QTime *time;
     Ui::MainWindow *ui;
@@ -46,17 +49,18 @@ private:
     QSettings *settings;
 
 private slots:
-    void timeOut();
-    void startShow();
-    void stopShow();
-    void changeChannelSettings(const QString object_name, const ChannelSettings settings);
-    void setSettings();
-    void getSettings(QList<ChannelSettings> &list);
+    void slotTimeOut();
+    void slotStartShow();
+    void slotStopShow();
+    void slotSetTimeScreen(int value);
+    void slotChangeChannelSettings(const QString object_name, const ChannelSettings settings);
+    void slotSetSettings();
+    void slotGetSettings(QList<ChannelSettings> &list);
 
 signals:
-    void start();
-    void stop();
-    void changeSpeed(int speed);
+    void signalStart();
+    void signalStop();
+    void signalChangeSpeed(int speed);
 };
 
 #endif // MAINWINDOW_H

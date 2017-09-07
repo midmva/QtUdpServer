@@ -45,12 +45,12 @@ void ControlChannel::mousePressEvent(QMouseEvent *event)
         QColor color(QColorDialog::getColor(ui->color_ch->palette().background().color(),this,"Choose the color of curve"));
         settings.color = color.name();
         ui->color_ch->setStyleSheet(QString("QLabel { background-color: %1 }").arg(settings.color));
-        emit changeChannelSettings(objectName(),settings);
+        emit signalChangeChannelSettings(objectName(),settings);
     }
 }
 
 void ControlChannel::on_enable_ch_clicked(bool checked)
 {
     settings.enable = checked;
-    emit changeChannelSettings(objectName(),settings);
+    emit signalChangeChannelSettings(objectName(),settings);
 }

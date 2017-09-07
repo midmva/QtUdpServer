@@ -5,13 +5,16 @@
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow),
-    maxY(0),minY(0),settings(new QSettings("Period","QtChartDemo",this))
+    maxY(0),
+    minY(0),
+    settings(new QSettings("Period","QtChartDemo",this)),
+    time_screen(10.0)
 {
     ui->setupUi(this);
 
 
     QList<ChannelSettings> list;
-    getSettings(list);
+    slotGetSettings(list);
     QPen pen;
     pen.setWidth(2);
 
@@ -25,7 +28,7 @@ MainWindow::MainWindow(QWidget *parent) :
     }
 
     timer = new QTimer(this);
-    connect(timer,&QTimer::timeout,this,&MainWindow::timeOut);
+    connect(timer,&QTimer::timeout,this,&MainWindow::slotTimeOut);
     timer->start(40);
 
     Chart *chart = new Chart();
@@ -95,26 +98,26 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->horizontalLayout->addWidget(control);
     ui->horizontalLayout->addWidget(chartView);
 
-    QObject::connect(control,&ControlPanel::start,this,&MainWindow::startShow);
-    QObject::connect(control,&ControlPanel::stop,this,&MainWindow::stopShow);
-    QObject::connect(control,&ControlPanel::changeSpeed,this,&MainWindow::changeSpeed);
-    QObject::connect(control,&ControlPanel::changeSettings,this,&MainWindow::changeChannelSettings);
+    QObject::connect(control,&ControlPanel::signalStart,this,&MainWindow::slotStartShow);
+    QObject::connect(control,&ControlPanel::signalStop,this,&MainWindow::slotStopShow);
+    QObject::connect(control,&ControlPanel::signalChangeSpeed,this,&MainWindow::slotSetTimeScreen);
+    QObject::connect(control,&ControlPanel::signalChangeSettings,this,&MainWindow::slotChangeChannelSettings);
 
     //setCentralWidget(chartView);
 }
 
 MainWindow::~MainWindow()
 {
-    setSettings();
+    slotSetSettings();
     delete ui;
 }
 
-void MainWindow::addPoint(const QPointF point)
+void MainWindow::slotAddPoint(const QPointF point)
 {
     list_point[0]->append(point);
 }
 
-void MainWindow::addList(const QList<QPointF> l)
+void MainWindow::slotAddList(const QList<QPointF> l)
 {
     QPointF p;
     for (int i = 0; i<l.count(); i++){
@@ -125,7 +128,7 @@ void MainWindow::addList(const QList<QPointF> l)
     chartView->chart()->axisX()->setMax(l.last().x());
 }
 
-void MainWindow::addData(const qreal time, const QList<qreal> list_data)
+void MainWindow::slotAddData(const qreal time, const QList<qreal> list_data)
 {
     QPointF p(time,0.0);
     for (int i = 0; i<list_data.count();i++){
@@ -134,11 +137,20 @@ void MainWindow::addData(const qreal time, const QList<qreal> list_data)
     }
 }
 
-void MainWindow::timeOut()
+void MainWindow::slotReceiveUdpPacket(const Packet &packet)
+{
+    QPointF p(packet.time_ms*0.001,0.0);
+    for (int i = 0; i<8;i++){
+        p.setY(packet.value_ch[i]);
+        list_point[i]->append(p);
+    }
+}
+
+void MainWindow::slotTimeOut()
 {
     if (!list_point[0]->count())return;
     chartView->chart()->axisX()->setMax(list_point[0]->last().x());
-    qreal time_min = list_point[0]->last().x()-10.0;
+    qreal time_min = list_point[0]->last().x()-time_screen;
     int index = list_point[0]->count()-1;
     for (;index!=0;index--){
         if (maxY<list_point[0]->at(index).y())
@@ -153,10 +165,10 @@ void MainWindow::timeOut()
         if (list_point[i]->isEmpty())continue;
         chartView->chart()->removeSeries(series[i]);
         series[i]->clear();
-        if (list_point[0]->last().x()>10.0){
+        if (list_point[0]->last().x()>time_screen){
             if (!list_point[i]->count())continue;
             series[i]->append(list_point[i]->mid(index));
-            if (!i)chartView->chart()->axisX()->setMin(list_point[i]->last().x()-10.0);
+            if (!i)chartView->chart()->axisX()->setMin(list_point[i]->last().x()-time_screen);
         }
         else{
            series[i]->append(list_point[i]->mid(0));
@@ -179,20 +191,23 @@ void MainWindow::timeOut()
 
 }
 
-void MainWindow::startShow()
+void MainWindow::slotStartShow()
 {
-    for (int i = 0; i<8;i++)
+    for (int i = 0; i<8;i++){
         series[i]->clear();
+        list_point[i]->clear();
+    }
     minY = maxY = 0;
     chartView->chart()->axisX()->setMax(0.0);
     timer->start(40);
-    emit start();
+    emit signalStart();
 }
 
-void MainWindow::stopShow()
+void MainWindow::slotStopShow()
 {
-    emit stop();
+    emit signalStop();
     timer->stop();
+    if (list_point[0]->isEmpty())return;
     chartView->chart()->axisX()->setMax(list_point[0]->last().x());
     for (int i = 0; i<8;i++){
         if (list_point[i]->isEmpty())continue;
@@ -209,7 +224,12 @@ void MainWindow::stopShow()
 
 }
 
-void MainWindow::changeChannelSettings(const QString object_name, const ChannelSettings settings)
+void MainWindow::slotSetTimeScreen(int value)
+{
+    time_screen = value*0.1;
+}
+
+void MainWindow::slotChangeChannelSettings(const QString object_name, const ChannelSettings settings)
 {
     for (int i = 0; i<8; i++){
         if (series[i]->objectName() == object_name){
@@ -220,7 +240,7 @@ void MainWindow::changeChannelSettings(const QString object_name, const ChannelS
     }
 }
 
-void MainWindow::setSettings()
+void MainWindow::slotSetSettings()
 {
     settings->beginGroup("application");
         settings->setValue("x",geometry().x());
@@ -242,7 +262,7 @@ void MainWindow::setSettings()
     settings->endGroup();
 }
 
-void MainWindow::getSettings(QList<ChannelSettings> &list)
+void MainWindow::slotGetSettings(QList<ChannelSettings> &list)
 {
     settings->beginGroup("application");
         int x = settings->value("x",100).toInt();

@@ -19,13 +19,9 @@ public:
     ~ControlPanel();
 
 private slots:
-    void updateLabel(int number);
+    void slotUpdateLabel(int number);
     void on_pushButton_clicked();
-    void on_pushButton_2_clicked();
-    void on_pushButton_3_clicked();
-    void on_pushButton_5_clicked();
-    void on_pushButton_4_clicked();
-
+    void on_horizontalSlider_valueChanged(int value);
 
 private:
     int speed_ms;
@@ -33,10 +29,10 @@ private:
 
 
 signals:
-    void start();
-    void stop();
-    void changeSpeed(int speed);
-    void changeSettings(const QString object_name, const ChannelSettings settings);
+    void signalStart();
+    void signalStop();
+    void signalChangeSpeed(int speed);
+    void signalChangeSettings(const QString object_name, const ChannelSettings settings);
 };
 
 #endif // CONTROLPANEL_H

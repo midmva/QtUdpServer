@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       += core gui charts
+QT       += core gui charts network
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -30,7 +30,8 @@ SOURCES += \
     chartview.cpp \
     controlpanel.cpp \
     threadcalculate.cpp \
-    controlchannel.cpp
+    controlchannel.cpp \
+    threadreceiver.cpp
 
 HEADERS += \
         mainwindow.h \
@@ -38,7 +39,8 @@ HEADERS += \
     chartview.h \
     controlpanel.h \
     threadcalculate.h \
-    controlchannel.h
+    controlchannel.h \
+    threadreceiver.h
 
 FORMS += \
         mainwindow.ui \
